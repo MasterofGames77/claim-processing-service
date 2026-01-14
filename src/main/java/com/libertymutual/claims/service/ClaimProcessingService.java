@@ -4,6 +4,7 @@ import com.libertymutual.claims.model.Claim;
 import com.libertymutual.claims.repository.ClaimRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,7 @@ public class ClaimProcessingService {
     
     @Async
     @Transactional
-    public CompletableFuture<Void> processClaimAsync(Long claimId) {
+    public CompletableFuture<Void> processClaimAsync(@NonNull Long claimId) {
         log.info("Starting async processing for claim ID: {}", claimId);
         
         try {

@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,13 +38,20 @@ public class ClaimService {
                 .status(request.getStatus())
                 .build();
         
+        // JPA save() never returns null for new entities
+        @SuppressWarnings("null")
         Claim savedClaim = claimRepository.save(claim);
         
         // Invalidate cache when new claim is added
         evictSummaryCache();
         
         // Process claim asynchronously
-        claimProcessingService.processClaimAsync(savedClaim.getId());
+        Long claimId = savedClaim.getId();
+        if (claimId != null) {
+            claimProcessingService.processClaimAsync(claimId);
+        } else {
+            log.error("Claim saved but ID is null, cannot process asynchronously");
+        }
         
         return mapToResponse(savedClaim);
     }
